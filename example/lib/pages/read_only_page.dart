@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 
-import '../universal_ui/universal_ui.dart';
 import '../widgets/demo_scaffold.dart';
 
 class ReadOnlyPage extends StatefulWidget {
@@ -48,8 +47,7 @@ class _ReadOnlyPageState extends State<ReadOnlyPage> {
           autoFocus: true,
           readOnly: !_edit,
           expands: false,
-          padding: EdgeInsets.zero,
-          embedBuilder: defaultEmbedBuilderWeb);
+          padding: EdgeInsets.zero);
     }
     return Padding(
       padding: const EdgeInsets.all(8),

@@ -97,61 +97,36 @@ String _standardizeImageUrl(String url) {
   return url;
 }
 
-Widget _defaultEmbedBuilder(
-    BuildContext context, leaf.Embed node, bool readOnly) {
-  assert(!kIsWeb, 'Please provide EmbedBuilder for Web');
-  switch (node.value.type) {
-    case 'image':
-      final imageUrl = _standardizeImageUrl(node.value.data);
-      return imageUrl.startsWith('http')
-          ? Image.network(imageUrl)
-          : isBase64(imageUrl)
-              ? Image.memory(base64.decode(imageUrl))
-              : Image.file(io.File(imageUrl));
-    case 'video':
-      final videoUrl = node.value.data;
-      if (videoUrl.contains('youtube.com') || videoUrl.contains('youtu.be')) {
-        return YoutubeVideoApp(
-            videoUrl: videoUrl, context: context, readOnly: readOnly);
-      }
-      return VideoApp(videoUrl: videoUrl, context: context, readOnly: readOnly);
-    default:
-      throw UnimplementedError(
-        'Embeddable type "${node.value.type}" is not supported by default '
-        'embed builder of QuillEditor. You must pass your own builder function '
-        'to embedBuilder property of QuillEditor or QuillField widgets.',
-      );
-  }
-}
-
 class QuillEditor extends StatefulWidget {
-  const QuillEditor(
-      {required this.controller,
-      required this.focusNode,
-      required this.scrollController,
-      required this.scrollable,
-      required this.padding,
-      required this.autoFocus,
-      required this.readOnly,
-      required this.expands,
-      this.showCursor,
-      this.paintCursorAboveText,
-      this.placeholder,
-      this.enableInteractiveSelection = true,
-      this.scrollBottomInset = 0,
-      this.minHeight,
-      this.maxHeight,
-      this.customStyles,
-      this.textCapitalization = TextCapitalization.sentences,
-      this.keyboardAppearance = Brightness.light,
-      this.scrollPhysics,
-      this.onLaunchUrl,
-      this.onTapDown,
-      this.onTapUp,
-      this.onSingleLongTapStart,
-      this.onSingleLongTapMoveUpdate,
-      this.onSingleLongTapEnd,
-      this.embedBuilder = _defaultEmbedBuilder});
+  QuillEditor({
+    required this.controller,
+    required this.focusNode,
+    required this.scrollController,
+    required this.scrollable,
+    required this.padding,
+    required this.autoFocus,
+    required this.readOnly,
+    required this.expands,
+    this.showCursor,
+    this.paintCursorAboveText,
+    this.placeholder,
+    this.enableInteractiveSelection = true,
+    this.scrollBottomInset = 0,
+    this.minHeight,
+    this.maxHeight,
+    this.customStyles,
+    this.textCapitalization = TextCapitalization.sentences,
+    this.keyboardAppearance = Brightness.light,
+    this.scrollPhysics,
+    this.onLaunchUrl,
+    this.onTapDown,
+    this.onTapUp,
+    this.onSingleLongTapStart,
+    this.onSingleLongTapMoveUpdate,
+    this.onSingleLongTapEnd,
+    this.options = const {},
+    this.embedBuilder
+  });
 
   factory QuillEditor.basic({
     required QuillController controller,
@@ -188,6 +163,8 @@ class QuillEditor extends StatefulWidget {
   final Brightness keyboardAppearance;
   final ScrollPhysics? scrollPhysics;
   final ValueChanged<String>? onLaunchUrl;
+  final Map<String, String>? options;
+
   // Returns whether gesture is handled
   final bool Function(
       TapDownDetails details, TextPosition Function(Offset offset))? onTapDown;
@@ -204,12 +181,42 @@ class QuillEditor extends StatefulWidget {
   // Returns whether gesture is handled
   final bool Function(LongPressMoveUpdateDetails details,
       TextPosition Function(Offset offset))? onSingleLongTapMoveUpdate;
+
   // Returns whether gesture is handled
   final bool Function(
           LongPressEndDetails details, TextPosition Function(Offset offset))?
       onSingleLongTapEnd;
 
-  final EmbedBuilder embedBuilder;
+  EmbedBuilder? embedBuilder;
+
+  Widget _defaultEmbedBuilder(
+      BuildContext context, leaf.Embed node, bool readOnly) {
+    assert(!kIsWeb, 'Please provide EmbedBuilder for Web');
+    switch (node.value.type) {
+      case 'image':
+        print('[CMS] image node: $options');
+        final imageUrl = _standardizeImageUrl(node.value.data);
+        return imageUrl.startsWith('http')
+            ? Image.network(imageUrl, headers: options)
+            : isBase64(imageUrl)
+            ? Image.memory(base64.decode(imageUrl))
+            : Image.file(io.File(imageUrl));
+      case 'video':
+        final videoUrl = node.value.data;
+        if (videoUrl.contains('youtube.com') || videoUrl.contains('youtu.be')) {
+          return YoutubeVideoApp(
+              videoUrl: videoUrl, context: context, readOnly: readOnly);
+        }
+        return VideoApp(videoUrl: videoUrl, context: context, readOnly: readOnly);
+      default:
+        throw UnimplementedError(
+          'Embeddable type "${node.value.type}" is not supported by default '
+              'embed builder of QuillEditor. You must pass your own builder function '
+              'to embedBuilder property of QuillEditor or QuillField widgets.',
+        );
+    }
+  }
+
 
   @override
   _QuillEditorState createState() => _QuillEditorState();
@@ -313,7 +320,7 @@ class _QuillEditorState extends State<QuillEditor>
           widget.keyboardAppearance,
           widget.enableInteractiveSelection,
           widget.scrollPhysics,
-          widget.embedBuilder),
+          widget.embedBuilder ?? widget._defaultEmbedBuilder),
     );
   }
 

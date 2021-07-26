@@ -138,7 +138,8 @@ class _HomePageState extends State<HomePage> {
                 null),
             sizeSmall: const TextStyle(fontSize: 9),
           ),
-          embedBuilder: defaultEmbedBuilderWeb);
+          embedBuilder: defaultEmbedBuilderWeb
+      );
     }
     var toolbar = QuillToolbar.basic(
         controller: _controller!,

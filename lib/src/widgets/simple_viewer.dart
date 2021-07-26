@@ -35,6 +35,7 @@ class QuillSimpleViewer extends StatefulWidget {
     this.truncateWidth,
     this.scrollBottomInset = 0,
     this.padding = EdgeInsets.zero,
+    this.options = const {},
     this.embedBuilder,
     Key? key,
   })  : assert(truncate ||
@@ -54,6 +55,7 @@ class QuillSimpleViewer extends StatefulWidget {
   final double scrollBottomInset;
   final EdgeInsetsGeometry padding;
   final EmbedBuilder? embedBuilder;
+  final Map<String, String>? options;
   final bool readOnly;
 
   @override
@@ -108,7 +110,7 @@ class _QuillSimpleViewerState extends State<QuillSimpleViewer>
       case 'image':
         final imageUrl = _standardizeImageUrl(node.value.data);
         return imageUrl.startsWith('http')
-            ? Image.network(imageUrl)
+            ? Image.network(imageUrl, headers: widget.options,)
             : isBase64(imageUrl)
                 ? Image.memory(base64.decode(imageUrl))
                 : Image.file(io.File(imageUrl));
