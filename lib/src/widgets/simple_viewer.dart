@@ -248,8 +248,7 @@ class _QuillSimpleViewerState extends State<QuillSimpleViewer>
       } else {
         widget.controller.formatText(offset, 0, Attribute.unchecked);
       }
-      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-      widget.controller.notifyListeners();
+      setState(() {});
     }
   }
 
