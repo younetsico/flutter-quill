@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/src/widgets/viewer/simple_viewer.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -127,7 +128,8 @@ class QuillEditor extends StatefulWidget {
       this.onSingleLongTapEnd,
       this.options = const {},
       this.embedBuilder,
-      this.bottomWidget});
+      this.bottomWidget,
+      this.onCustomToolbarActionCallback});
 
   factory QuillEditor.basic({
     required QuillController controller,
@@ -190,6 +192,7 @@ class QuillEditor extends StatefulWidget {
 
   final EmbedBuilder? embedBuilder;
   final Widget? bottomWidget;
+  final ToolbarActionListener? onCustomToolbarActionCallback;
 
   Widget _defaultEmbedBuilder(
       BuildContext context, leaf.Embed node, bool readOnly) {
@@ -323,6 +326,7 @@ class _QuillEditorState extends State<QuillEditor>
           widget.scrollPhysics,
           widget.embedBuilder ?? widget._defaultEmbedBuilder,
           bottomWidget: widget.bottomWidget,
+          onCustomToolbarActionCallback: widget.onCustomToolbarActionCallback,
         ));
   }
 

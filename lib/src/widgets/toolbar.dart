@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/src/widgets/toolbar/emoji_button.dart';
 
 import '../models/documents/attribute.dart';
 import 'controller.dart';
@@ -78,6 +79,7 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
     bool showHorizontalRule = false,
     bool multiRowsDisplay = true,
     bool showCamera = true,
+    bool showEmoji = true,
     OnImagePickCallback? onImagePickCallback,
     OnVideoPickCallback? onVideoPickCallback,
     FilePickImpl? filePickImpl,
@@ -121,6 +123,11 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
             controller: controller,
             undo: false,
           ),
+        VerticalDivider(
+          indent: 12,
+          endIndent: 12,
+          color: Colors.grey.shade400,
+        ),
         if (showBoldButton)
           ToggleStyleButton(
             attribute: Attribute.bold,
@@ -149,6 +156,11 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
             iconSize: toolbarIconSize,
             controller: controller,
           ),
+        VerticalDivider(
+          indent: 12,
+          endIndent: 12,
+          color: Colors.grey.shade400,
+        ),
         if (showColorButton)
           ColorButton(
             icon: Icons.color_lens,
@@ -169,6 +181,11 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
             iconSize: toolbarIconSize,
             controller: controller,
           ),
+        VerticalDivider(
+          indent: 12,
+          endIndent: 12,
+          color: Colors.grey.shade400,
+        ),
         if (onImagePickCallback != null)
           ImageButton(
             icon: Icons.image,
@@ -284,15 +301,21 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
             endIndent: 12,
             color: Colors.grey.shade400,
           ),
-        if (showLink)
-          LinkStyleButton(
-            controller: controller,
-            iconSize: toolbarIconSize,
-          ),
         if (showHorizontalRule)
           InsertEmbedButton(
             controller: controller,
             icon: Icons.horizontal_rule,
+            iconSize: toolbarIconSize,
+          ),
+        if (showEmoji)
+          EmojiButton(
+              icon: Icons.emoji_emotions_outlined,
+              controller: controller,
+              iconSize: toolbarIconSize,
+          ),
+        if (showLink)
+          LinkStyleButton(
+            controller: controller,
             iconSize: toolbarIconSize,
           ),
       ],
@@ -330,4 +353,18 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
       child: ArrowIndicatedButtonList(buttons: children),
     );
   }
+}
+
+
+enum ToolbarEvent {
+  togglEmoji
+}
+
+typedef ToolbarActionListener = Function(CustomToolbarAction action);
+
+class CustomToolbarAction {
+  CustomToolbarAction(this.event, {this.data});
+
+  ToolbarEvent event;
+  Object? data;
 }
