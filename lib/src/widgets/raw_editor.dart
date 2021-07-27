@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:tuple/tuple.dart';
 
 import '../models/documents/attribute.dart';
@@ -57,8 +58,8 @@ class RawEditor extends StatefulWidget {
       this.enableInteractiveSelection,
       this.scrollPhysics,
       this.embedBuilder,
-      {this.bottomWidget}
-      )
+      {this.bottomWidget,
+      this.onCustomToolbarActionCallback})
       : assert(maxHeight == null || maxHeight > 0, 'maxHeight cannot be null'),
         assert(minHeight == null || minHeight >= 0, 'minHeight cannot be null'),
         assert(maxHeight == null || minHeight == null || maxHeight >= minHeight,
@@ -93,6 +94,7 @@ class RawEditor extends StatefulWidget {
   final ScrollPhysics? scrollPhysics;
   final EmbedBuilder embedBuilder;
   final Widget? bottomWidget;
+  final ToolbarActionListener? onCustomToolbarActionCallback;
 
   @override
   State<StatefulWidget> createState() => RawEditorState();
@@ -179,10 +181,7 @@ class RawEditorState extends EditorState
           controller: _scrollController,
           physics: widget.scrollPhysics,
           child: Column(
-            children: [
-              child,
-              widget.bottomWidget ?? const SizedBox()
-            ],
+            children: [child, widget.bottomWidget ?? const SizedBox()],
           ),
         ),
       );
@@ -328,6 +327,8 @@ class RawEditorState extends EditorState
 
     _clipboardStatus.addListener(_onChangedClipboardStatus);
 
+    widget.controller.registerToolbarAction(_onToolbarAction);
+
     widget.controller.addListener(() {
       _didChangeTextEditingValue(widget.controller.ignoreFocusOnTextChange);
     });
@@ -398,6 +399,10 @@ class RawEditorState extends EditorState
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller.removeListener(_didChangeTextEditingValue);
       widget.controller.addListener(_didChangeTextEditingValue);
+
+      oldWidget.controller.unregisterToolbarAction(_onToolbarAction);
+      widget.controller.registerToolbarAction(_onToolbarAction);
+
       updateRemoteValueIfNeeded();
     }
 
@@ -443,6 +448,7 @@ class RawEditorState extends EditorState
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     widget.controller.removeListener(_didChangeTextEditingValue);
+    widget.controller.unregisterToolbarAction(_onToolbarAction);
     widget.focusNode.removeListener(_handleFocusChanged);
     _focusAttachment!.detach();
     _cursorCont.dispose();
@@ -450,6 +456,12 @@ class RawEditorState extends EditorState
       ..removeListener(_onChangedClipboardStatus)
       ..dispose();
     super.dispose();
+  }
+
+  void _onToolbarAction(CustomToolbarAction event) {
+    print('[_onToolbarAction] triggered: ${event.event}');
+
+    widget.onCustomToolbarActionCallback?.call(event);
   }
 
   void _updateSelectionOverlayForScroll() {
@@ -579,7 +591,7 @@ class RawEditorState extends EditorState
 
         final viewport = RenderAbstractViewport.of(renderEditor);
         final editorOffset =
-        renderEditor.localToGlobal(const Offset(0, 0), ancestor: viewport);
+            renderEditor.localToGlobal(const Offset(0, 0), ancestor: viewport);
         final offsetInViewport = _scrollController!.offset + editorOffset.dy;
 
         final offset = renderEditor.getOffsetToRevealCursor(
