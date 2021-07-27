@@ -37,6 +37,7 @@ class QuillSimpleViewer extends StatefulWidget {
     this.padding = EdgeInsets.zero,
     this.options = const {},
     this.embedBuilder,
+    this.onCheckBoxTap,
     Key? key,
   })  : assert(truncate ||
             ((truncateScale == null) &&
@@ -57,6 +58,7 @@ class QuillSimpleViewer extends StatefulWidget {
   final EmbedBuilder? embedBuilder;
   final Map<String, String>? options;
   final bool readOnly;
+  final Function(int offset, bool value)? onCheckBoxTap;
 
   @override
   _QuillSimpleViewerState createState() => _QuillSimpleViewerState();
@@ -110,7 +112,10 @@ class _QuillSimpleViewerState extends State<QuillSimpleViewer>
       case 'image':
         final imageUrl = _standardizeImageUrl(node.value.data);
         return imageUrl.startsWith('http')
-            ? Image.network(imageUrl, headers: widget.options,)
+            ? Image.network(
+                imageUrl,
+                headers: widget.options,
+              )
             : isBase64(imageUrl)
                 ? Image.memory(base64.decode(imageUrl))
                 : Image.file(io.File(imageUrl));
@@ -236,6 +241,14 @@ class _QuillSimpleViewerState extends State<QuillSimpleViewer>
   /// by changing its attribute according to [value].
   void _handleCheckboxTap(int offset, bool value) {
     // readonly - do nothing
+    if (!widget.readOnly) {
+      widget.onCheckBoxTap?.call(offset, value);
+      if (value) {
+        widget.controller.formatText(offset, 0, Attribute.checked);
+      } else {
+        widget.controller.formatText(offset, 0, Attribute.unchecked);
+      }
+    }
   }
 
   TextDirection get _textDirection {
