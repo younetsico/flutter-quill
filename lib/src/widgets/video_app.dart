@@ -43,17 +43,22 @@ class _VideoAppState extends State<VideoApp> {
     final defaultStyles = DefaultStyles.getInstance(context);
     if (!_controller.value.isInitialized || _controller.value.hasError) {
       if (widget.readOnly) {
-        return RichText(
-          text: TextSpan(
-              text: widget.videoUrl,
-              style: defaultStyles.link,
-              recognizer: TapGestureRecognizer()
-                ..onTap = () => launch(widget.videoUrl)),
+        return AspectRatio(
+          aspectRatio: _controller.value.aspectRatio,
+          child: RichText(
+            text: TextSpan(
+                text: widget.videoUrl,
+                style: defaultStyles.link,
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () => launch(widget.videoUrl)),
+          ),
         );
       }
-
-      return RichText(
-          text: TextSpan(text: widget.videoUrl, style: defaultStyles.link));
+      return AspectRatio(
+        aspectRatio: _controller.value.aspectRatio,
+        child: RichText(
+            text: TextSpan(text: widget.videoUrl, style: defaultStyles.link)),
+      );
     }
 
     return Container(
