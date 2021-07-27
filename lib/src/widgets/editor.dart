@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_quill/src/widgets/viewer/simple_viewer.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -98,36 +99,35 @@ String _standardizeImageUrl(String url) {
 }
 
 class QuillEditor extends StatefulWidget {
-  QuillEditor({
-    required this.controller,
-    required this.focusNode,
-    required this.scrollController,
-    required this.scrollable,
-    required this.padding,
-    required this.autoFocus,
-    required this.readOnly,
-    required this.expands,
-    this.showCursor,
-    this.paintCursorAboveText,
-    this.placeholder,
-    this.enableInteractiveSelection = true,
-    this.scrollBottomInset = 0,
-    this.minHeight,
-    this.maxHeight,
-    this.customStyles,
-    this.textCapitalization = TextCapitalization.sentences,
-    this.keyboardAppearance = Brightness.light,
-    this.scrollPhysics,
-    this.onLaunchUrl,
-    this.onTapDown,
-    this.onTapUp,
-    this.onSingleLongTapStart,
-    this.onSingleLongTapMoveUpdate,
-    this.onSingleLongTapEnd,
-    this.options = const {},
-    this.embedBuilder,
-    this.bottomWidget
-  });
+  QuillEditor(
+      {required this.controller,
+      required this.focusNode,
+      required this.scrollController,
+      required this.scrollable,
+      required this.padding,
+      required this.autoFocus,
+      required this.readOnly,
+      required this.expands,
+      this.showCursor,
+      this.paintCursorAboveText,
+      this.placeholder,
+      this.enableInteractiveSelection = true,
+      this.scrollBottomInset = 0,
+      this.minHeight,
+      this.maxHeight,
+      this.customStyles,
+      this.textCapitalization = TextCapitalization.sentences,
+      this.keyboardAppearance = Brightness.light,
+      this.scrollPhysics,
+      this.onLaunchUrl,
+      this.onTapDown,
+      this.onTapUp,
+      this.onSingleLongTapStart,
+      this.onSingleLongTapMoveUpdate,
+      this.onSingleLongTapEnd,
+      this.options = const {},
+      this.embedBuilder,
+      this.bottomWidget});
 
   factory QuillEditor.basic({
     required QuillController controller,
@@ -200,24 +200,24 @@ class QuillEditor extends StatefulWidget {
         return imageUrl.startsWith('http')
             ? Image.network(imageUrl, headers: options)
             : isBase64(imageUrl)
-            ? Image.memory(base64.decode(imageUrl))
-            : Image.file(io.File(imageUrl));
+                ? Image.memory(base64.decode(imageUrl))
+                : Image.file(io.File(imageUrl));
       case 'video':
         final videoUrl = node.value.data;
         if (videoUrl.contains('youtube.com') || videoUrl.contains('youtu.be')) {
           return YoutubeVideoApp(
               videoUrl: videoUrl, context: context, readOnly: readOnly);
         }
-        return VideoApp(videoUrl: videoUrl, context: context, readOnly: readOnly);
+        return VideoApp(
+            videoUrl: videoUrl, context: context, readOnly: readOnly);
       default:
         throw UnimplementedError(
           'Embeddable type "${node.value.type}" is not supported by default '
-              'embed builder of QuillEditor. You must pass your own builder function '
-              'to embedBuilder property of QuillEditor or QuillField widgets.',
+          'embed builder of QuillEditor. You must pass your own builder function '
+          'to embedBuilder property of QuillEditor or QuillField widgets.',
         );
     }
   }
-
 
   @override
   _QuillEditorState createState() => _QuillEditorState();
@@ -280,8 +280,8 @@ class _QuillEditorState extends State<QuillEditor>
     }
 
     return _selectionGestureDetectorBuilder.build(
-      HitTestBehavior.translucent,
-      RawEditor(
+        HitTestBehavior.translucent,
+        RawEditor(
           _editorKey,
           widget.controller,
           widget.focusNode,
@@ -323,7 +323,7 @@ class _QuillEditorState extends State<QuillEditor>
           widget.scrollPhysics,
           widget.embedBuilder ?? widget._defaultEmbedBuilder,
           bottomWidget: widget.bottomWidget,
-      ));
+        ));
   }
 
   @override

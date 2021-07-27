@@ -61,33 +61,30 @@ class _VideoAppState extends State<VideoApp> {
       );
     }
 
-    return Container(
-      height: 300,
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _controller.value.isPlaying
-                ? _controller.pause()
-                : _controller.play();
-          });
-        },
-        child: Stack(alignment: Alignment.center, children: [
-          Center(
-              child: AspectRatio(
-            aspectRatio: _controller.value.aspectRatio,
-            child: VideoPlayer(_controller),
-          )),
+    return InkWell(
+      onTap: () {
+        setState(() {
           _controller.value.isPlaying
-              ? const SizedBox.shrink()
-              : Container(
-                  color: const Color(0xfff5f5f5),
-                  child: const Icon(
-                    Icons.play_arrow,
-                    size: 60,
-                    color: Colors.blueGrey,
-                  ))
-        ]),
-      ),
+              ? _controller.pause()
+              : _controller.play();
+        });
+      },
+      child: Stack(alignment: Alignment.center, children: [
+        Center(
+            child: AspectRatio(
+          aspectRatio: _controller.value.aspectRatio,
+          child: VideoPlayer(_controller),
+        )),
+        _controller.value.isPlaying
+            ? const SizedBox.shrink()
+            : Container(
+                color: const Color(0xfff5f5f5),
+                child: const Icon(
+                  Icons.play_arrow,
+                  size: 60,
+                  color: Colors.blueGrey,
+                ))
+      ]),
     );
   }
 

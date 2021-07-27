@@ -2,26 +2,31 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_quill/src/widgets/image.dart';
+import 'package:flutter_quill/src/widgets/text_selection.dart';
+import 'package:flutter_quill/src/widgets/viewer/delegate.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:tuple/tuple.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../models/documents/attribute.dart';
-import '../models/documents/document.dart';
-import '../models/documents/nodes/block.dart';
-import '../models/documents/nodes/leaf.dart' as leaf;
-import '../models/documents/nodes/line.dart';
-import 'controller.dart';
-import 'cursor.dart';
-import 'default_styles.dart';
-import 'delegate.dart';
-import 'editor.dart';
-import 'text_block.dart';
-import 'text_line.dart';
-import 'video_app.dart';
-import 'youtube_video_app.dart';
+import '../../models/documents/attribute.dart';
+import '../../models/documents/document.dart';
+import '../../models/documents/nodes/block.dart';
+import '../../models/documents/nodes/leaf.dart' as leaf;
+import '../../models/documents/nodes/line.dart';
+import '../controller.dart';
+import '../cursor.dart';
+import '../default_styles.dart';
+import '../delegate.dart';
+import '../editor.dart';
+import '../text_block.dart';
+import '../text_line.dart';
+import '../video_app.dart';
+import '../youtube_video_app.dart';
 
 class QuillSimpleViewer extends StatefulWidget {
   const QuillSimpleViewer({
@@ -61,17 +66,111 @@ class QuillSimpleViewer extends StatefulWidget {
   final Function(int offset, bool value)? onCheckBoxTap;
 
   @override
-  _QuillSimpleViewerState createState() => _QuillSimpleViewerState();
+  QuillSimpleViewerState createState() => QuillSimpleViewerState();
 }
 
-class _QuillSimpleViewerState extends State<QuillSimpleViewer>
+class QuillSimpleViewerState extends State<QuillSimpleViewer>
+    with SingleTickerProviderStateMixin
+    implements ViewerSelectionGestureDetectorBuilderDelegate {
+  final GlobalKey<ViewerState> _editorKey = GlobalKey<ViewerState>();
+  late QuillViewerSelectionGestureDetectorBuilder
+      _selectionGestureDetectorBuilder;
+  @override
+  void initState() {
+    _selectionGestureDetectorBuilder =
+        QuillViewerSelectionGestureDetectorBuilder(this);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _selectionGestureDetectorBuilder.build(
+        HitTestBehavior.deferToChild,
+        QuillViewer(
+          controller: widget.controller,
+          readOnly: widget.readOnly,
+          customStyles: widget.customStyles,
+          embedBuilder: widget.embedBuilder,
+          key: _editorKey,
+          onCheckBoxTap: widget.onCheckBoxTap,
+          options: widget.options,
+          padding: widget.padding,
+          scrollBottomInset: widget.scrollBottomInset,
+          truncate: widget.truncate,
+          truncateAlignment: widget.truncateAlignment,
+          truncateHeight: widget.truncateHeight,
+          truncateScale: widget.truncateScale,
+          truncateWidth: widget.truncateWidth,
+        ));
+  }
+
+  @override
+  GlobalKey<ViewerState> getEditableTextKey() {
+    return _editorKey;
+  }
+
+  @override
+  bool getForcePressEnabled() {
+    return true;
+  }
+
+  @override
+  bool getSelectionEnabled() {
+    return true;
+  }
+}
+
+// ignore: unused_element
+class QuillViewer extends StatefulWidget {
+  const QuillViewer({
+    required this.controller,
+    required this.readOnly,
+    this.customStyles,
+    this.truncate = false,
+    this.truncateScale,
+    this.truncateAlignment,
+    this.truncateHeight,
+    this.truncateWidth,
+    this.scrollBottomInset = 0,
+    this.padding = EdgeInsets.zero,
+    this.options = const {},
+    this.embedBuilder,
+    this.onCheckBoxTap,
+    Key? key,
+    this.onLaunchUrl,
+  })  : assert(truncate ||
+            ((truncateScale == null) &&
+                (truncateAlignment == null) &&
+                (truncateHeight == null) &&
+                (truncateWidth == null))),
+        super(key: key);
+  final QuillController controller;
+  final DefaultStyles? customStyles;
+  final bool truncate;
+  final double? truncateScale;
+  final Alignment? truncateAlignment;
+  final double? truncateHeight;
+  final double? truncateWidth;
+  final double scrollBottomInset;
+  final EdgeInsetsGeometry padding;
+  final EmbedBuilder? embedBuilder;
+  final Map<String, String>? options;
+  final bool readOnly;
+  final Function(String)? onLaunchUrl;
+  final Function(int offset, bool value)? onCheckBoxTap;
+
+  @override
+  __QuillViewerState createState() => __QuillViewerState();
+}
+
+class __QuillViewerState extends ViewerState
     with SingleTickerProviderStateMixin {
   late DefaultStyles _styles;
   final LayerLink _toolbarLayerLink = LayerLink();
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
   late CursorCont _cursorCont;
-
+  final GlobalKey _editorKey = GlobalKey();
   @override
   void initState() {
     super.initState();
@@ -158,6 +257,7 @@ class _QuillSimpleViewerState extends State<QuillSimpleViewer>
       link: _toolbarLayerLink,
       child: Semantics(
         child: _SimpleViewer(
+          key: _editorKey,
           document: _doc,
           textDirection: _textDirection,
           startHandleLayerLink: _startHandleLayerLink,
@@ -195,7 +295,6 @@ class _QuillSimpleViewerState extends State<QuillSimpleViewer>
                 physics: const NeverScrollableScrollPhysics(), child: child));
       }
     }
-
     return QuillStyles(data: _styles, child: child);
   }
 
@@ -277,9 +376,9 @@ class _QuillSimpleViewerState extends State<QuillSimpleViewer>
         widget.controller.selection,
         Colors.black,
         //widget.selectionColor,
-        false,
+        true,
         //enableInteractiveSelection,
-        false,
+        true,
         //_hasFocus,
         MediaQuery.of(context).devicePixelRatio,
         _cursorCont);
@@ -320,7 +419,19 @@ class _QuillSimpleViewerState extends State<QuillSimpleViewer>
   }
 
   void _nullSelectionChanged(
-      TextSelection selection, SelectionChangedCause cause) {}
+      TextSelection selection, SelectionChangedCause cause) {
+    final a = widget.controller.document
+        .queryChild(selection.baseOffset)
+        .node
+        ?.toDelta();
+    print('${a?.toJson()}');
+  }
+
+  @override
+  RenderEditor? getRenderEditor() {
+    final obj = _editorKey.currentContext?.findRenderObject();
+    return obj as RenderEditor?;
+  }
 }
 
 class _SimpleViewer extends MultiChildRenderObjectWidget {
@@ -353,7 +464,7 @@ class _SimpleViewer extends MultiChildRenderObjectWidget {
       padding,
       document,
       const TextSelection(baseOffset: 0, extentOffset: 0),
-      false,
+      true,
       // hasFocus,
       onSelectionChanged,
       startHandleLayerLink,
