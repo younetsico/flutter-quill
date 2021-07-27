@@ -30,34 +30,36 @@ import 'text_line.dart';
 import 'text_selection.dart';
 
 class RawEditor extends StatefulWidget {
-  const RawEditor(
-    Key key,
-    this.controller,
-    this.focusNode,
-    this.scrollController,
-    this.scrollable,
-    this.scrollBottomInset,
-    this.padding,
-    this.readOnly,
-    this.placeholder,
-    this.onLaunchUrl,
-    this.toolbarOptions,
-    this.showSelectionHandles,
-    bool? showCursor,
-    this.cursorStyle,
-    this.textCapitalization,
-    this.maxHeight,
-    this.minHeight,
-    this.customStyles,
-    this.expands,
-    this.autoFocus,
-    this.selectionColor,
-    this.selectionCtrls,
-    this.keyboardAppearance,
-    this.enableInteractiveSelection,
-    this.scrollPhysics,
-    this.embedBuilder,
-  )   : assert(maxHeight == null || maxHeight > 0, 'maxHeight cannot be null'),
+  RawEditor(
+      Key key,
+      this.controller,
+      this.focusNode,
+      this.scrollController,
+      this.scrollable,
+      this.scrollBottomInset,
+      this.padding,
+      this.readOnly,
+      this.placeholder,
+      this.onLaunchUrl,
+      this.toolbarOptions,
+      this.showSelectionHandles,
+      bool? showCursor,
+      this.cursorStyle,
+      this.textCapitalization,
+      this.maxHeight,
+      this.minHeight,
+      this.customStyles,
+      this.expands,
+      this.autoFocus,
+      this.selectionColor,
+      this.selectionCtrls,
+      this.keyboardAppearance,
+      this.enableInteractiveSelection,
+      this.scrollPhysics,
+      this.embedBuilder,
+      {this.bottomWidget}
+      )
+      : assert(maxHeight == null || maxHeight > 0, 'maxHeight cannot be null'),
         assert(minHeight == null || minHeight >= 0, 'minHeight cannot be null'),
         assert(maxHeight == null || minHeight == null || maxHeight >= minHeight,
             'maxHeight cannot be null'),
@@ -67,6 +69,7 @@ class RawEditor extends StatefulWidget {
   final QuillController controller;
   final FocusNode focusNode;
   final ScrollController scrollController;
+
   final bool scrollable;
   final double scrollBottomInset;
   final EdgeInsetsGeometry padding;
@@ -89,6 +92,7 @@ class RawEditor extends StatefulWidget {
   final bool enableInteractiveSelection;
   final ScrollPhysics? scrollPhysics;
   final EmbedBuilder embedBuilder;
+  final Widget? bottomWidget;
 
   @override
   State<StatefulWidget> createState() => RawEditorState();
@@ -122,6 +126,7 @@ class RawEditorState extends EditorState
   // Focus
   bool _didAutoFocus = false;
   FocusAttachment? _focusAttachment;
+
   bool get _hasFocus => widget.focusNode.hasFocus;
 
   DefaultStyles? _styles;
@@ -173,7 +178,12 @@ class RawEditorState extends EditorState
         child: SingleChildScrollView(
           controller: _scrollController,
           physics: widget.scrollPhysics,
-          child: child,
+          child: Column(
+            children: [
+              child,
+              widget.bottomWidget ?? const SizedBox()
+            ],
+          ),
         ),
       );
     }
@@ -569,7 +579,7 @@ class RawEditorState extends EditorState
 
         final viewport = RenderAbstractViewport.of(renderEditor);
         final editorOffset =
-            renderEditor.localToGlobal(const Offset(0, 0), ancestor: viewport);
+        renderEditor.localToGlobal(const Offset(0, 0), ancestor: viewport);
         final offsetInViewport = _scrollController!.offset + editorOffset.dy;
 
         final offset = renderEditor.getOffsetToRevealCursor(

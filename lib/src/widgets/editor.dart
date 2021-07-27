@@ -125,7 +125,8 @@ class QuillEditor extends StatefulWidget {
     this.onSingleLongTapMoveUpdate,
     this.onSingleLongTapEnd,
     this.options = const {},
-    this.embedBuilder
+    this.embedBuilder,
+    this.bottomWidget
   });
 
   factory QuillEditor.basic({
@@ -187,14 +188,14 @@ class QuillEditor extends StatefulWidget {
           LongPressEndDetails details, TextPosition Function(Offset offset))?
       onSingleLongTapEnd;
 
-  EmbedBuilder? embedBuilder;
+  final EmbedBuilder? embedBuilder;
+  final Widget? bottomWidget;
 
   Widget _defaultEmbedBuilder(
       BuildContext context, leaf.Embed node, bool readOnly) {
     assert(!kIsWeb, 'Please provide EmbedBuilder for Web');
     switch (node.value.type) {
       case 'image':
-        print('[CMS] image node: $options');
         final imageUrl = _standardizeImageUrl(node.value.data);
         return imageUrl.startsWith('http')
             ? Image.network(imageUrl, headers: options)
@@ -320,8 +321,9 @@ class _QuillEditorState extends State<QuillEditor>
           widget.keyboardAppearance,
           widget.enableInteractiveSelection,
           widget.scrollPhysics,
-          widget.embedBuilder ?? widget._defaultEmbedBuilder),
-    );
+          widget.embedBuilder ?? widget._defaultEmbedBuilder,
+          bottomWidget: widget.bottomWidget,
+      ));
   }
 
   @override
