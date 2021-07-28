@@ -29,11 +29,11 @@ class EditorTextSelectionGestureDetectorBuilder {
   }
 
   RenderEditor? getRenderEditor() {
-    return getEditor()!.getRenderEditor();
+    return getEditor()?.getRenderEditor();
   }
 
   void onTapDown(TapDownDetails details) {
-    getRenderEditor()!.handleTapDown(details);
+    getRenderEditor()?.handleTapDown(details);
 
     final kind = details.kind;
     shouldShowSelectionToolbar = kind == null ||

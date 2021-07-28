@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
+import 'package:flutter_quill/widgets/simple_viewer.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tuple/tuple.dart';
@@ -70,23 +71,29 @@ class _HomePageState extends State<HomePage> {
         child: _buildMenuBar(context),
       ),
       body: RawKeyboardListener(
-        focusNode: FocusNode(),
-        onKey: (event) {
-          if (event.data.isControlPressed && event.character == 'b') {
-            if (_controller!
-                .getSelectionStyle()
-                .attributes
-                .keys
-                .contains('bold')) {
-              _controller!
-                  .formatSelection(Attribute.clone(Attribute.bold, null));
-            } else {
-              _controller!.formatSelection(Attribute.bold);
+          focusNode: FocusNode(),
+          onKey: (event) {
+            if (event.data.isControlPressed && event.character == 'b') {
+              if (_controller!
+                  .getSelectionStyle()
+                  .attributes
+                  .keys
+                  .contains('bold')) {
+                _controller!
+                    .formatSelection(Attribute.clone(Attribute.bold, null));
+              } else {
+                _controller!.formatSelection(Attribute.bold);
+              }
             }
-          }
-        },
-        child: _buildWelcomeEditor(context),
-      ),
+          },
+          child: SingleChildScrollView(
+            child: QuillSimpleViewer(
+              controller: _controller!,
+              readOnly: false,
+            ),
+          )
+          // child: _buildWelcomeEditor(context),
+          ),
     );
   }
 
@@ -138,8 +145,7 @@ class _HomePageState extends State<HomePage> {
                 null),
             sizeSmall: const TextStyle(fontSize: 9),
           ),
-          embedBuilder: defaultEmbedBuilderWeb
-      );
+          embedBuilder: defaultEmbedBuilderWeb);
     }
     var toolbar = QuillToolbar.basic(
         controller: _controller!,
