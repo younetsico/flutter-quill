@@ -31,7 +31,7 @@ import 'text_line.dart';
 import 'text_selection.dart';
 
 class RawEditor extends StatefulWidget {
-  RawEditor(
+  const RawEditor(
       Key key,
       this.controller,
       this.focusNode,
@@ -327,8 +327,6 @@ class RawEditorState extends EditorState
 
     _clipboardStatus.addListener(_onChangedClipboardStatus);
 
-    widget.controller.registerToolbarAction(_onToolbarAction);
-
     widget.controller.addListener(() {
       _didChangeTextEditingValue(widget.controller.ignoreFocusOnTextChange);
     });
@@ -400,9 +398,6 @@ class RawEditorState extends EditorState
       oldWidget.controller.removeListener(_didChangeTextEditingValue);
       widget.controller.addListener(_didChangeTextEditingValue);
 
-      oldWidget.controller.unregisterToolbarAction(_onToolbarAction);
-      widget.controller.registerToolbarAction(_onToolbarAction);
-
       updateRemoteValueIfNeeded();
     }
 
@@ -448,7 +443,6 @@ class RawEditorState extends EditorState
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     widget.controller.removeListener(_didChangeTextEditingValue);
-    widget.controller.unregisterToolbarAction(_onToolbarAction);
     widget.focusNode.removeListener(_handleFocusChanged);
     _focusAttachment!.detach();
     _cursorCont.dispose();
@@ -456,12 +450,6 @@ class RawEditorState extends EditorState
       ..removeListener(_onChangedClipboardStatus)
       ..dispose();
     super.dispose();
-  }
-
-  void _onToolbarAction(CustomToolbarAction event) {
-    print('[_onToolbarAction] triggered: ${event.event}');
-
-    widget.onCustomToolbarActionCallback?.call(event);
   }
 
   void _updateSelectionOverlayForScroll() {
@@ -478,7 +466,18 @@ class RawEditorState extends EditorState
     }
 
     if (ignoreFocus || _keyboardVisible) {
-      _onChangeTextEditingValue(ignoreFocus);
+      // KEVTODO: custom emoji keyboard behavior
+      // Edited on 13:51 on Wed 28 Jul 2021
+      // i commented this line to prevent emoji keyboard keeping unfocus
+      // after choosed one
+      // _onChangeTextEditingValue(ignoreFocus);
+
+      if (mounted) {
+        setState(() {
+          // Use widget.controller.value in build()
+          // Trigger build and updateChildren
+        });
+      }
     } else {
       requestKeyboard();
       if (mounted) {

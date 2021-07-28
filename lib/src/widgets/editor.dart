@@ -128,7 +128,6 @@ class QuillEditor extends StatefulWidget {
     this.options = const {},
     this.embedBuilder,
     this.bottomWidget,
-    this.onCustomToolbarActionCallback
   });
 
   factory QuillEditor.basic({
@@ -192,7 +191,6 @@ class QuillEditor extends StatefulWidget {
 
   final EmbedBuilder? embedBuilder;
   final Widget? bottomWidget;
-  final ToolbarActionListener? onCustomToolbarActionCallback;
 
   Widget _defaultEmbedBuilder(
       BuildContext context, leaf.Embed node, bool readOnly) {
@@ -326,7 +324,6 @@ class _QuillEditorState extends State<QuillEditor>
           widget.scrollPhysics,
           widget.embedBuilder ?? widget._defaultEmbedBuilder,
           bottomWidget: widget.bottomWidget,
-          onCustomToolbarActionCallback: widget.onCustomToolbarActionCallback,
       ));
   }
 
