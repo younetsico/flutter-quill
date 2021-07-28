@@ -10,11 +10,9 @@ import '../../flutter_quill.dart';
 /// Widget for playing back video
 /// Refer to https://github.com/flutter/plugins/tree/master/packages/video_player/video_player
 class VideoApp extends StatefulWidget {
-  const VideoApp(
-      {required this.videoUrl, required this.context, required this.readOnly});
+  const VideoApp({required this.videoUrl, required this.readOnly});
 
   final String videoUrl;
-  final BuildContext context;
   final bool readOnly;
 
   @override

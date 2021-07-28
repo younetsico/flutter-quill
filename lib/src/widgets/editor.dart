@@ -212,7 +212,9 @@ class QuillEditor extends StatefulWidget {
               videoUrl: videoUrl, context: context, readOnly: readOnly);
         }
         return VideoApp(
-            videoUrl: videoUrl, context: context, readOnly: readOnly);
+          videoUrl: videoUrl,
+          readOnly: readOnly,
+        );
       default:
         throw UnimplementedError(
           'Embeddable type "${node.value.type}" is not supported by default '

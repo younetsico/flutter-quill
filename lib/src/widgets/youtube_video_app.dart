@@ -17,17 +17,21 @@ class YoutubeVideoApp extends StatefulWidget {
 }
 
 class _YoutubeVideoAppState extends State<YoutubeVideoApp> {
-  var _youtubeController;
-
+  YoutubePlayerController? _youtubeController;
+  String? videoId;
+  bool canShowPlayer = false;
   @override
   void initState() {
     super.initState();
-    final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
+
+    videoId = YoutubePlayer.convertUrlToId(
+        'https://www.youtube.com/watch?v=4zUQEkDdNR0');
     if (videoId != null) {
       _youtubeController = YoutubePlayerController(
-        initialVideoId: videoId,
+        initialVideoId: videoId!,
         flags: const YoutubePlayerFlags(
-          autoPlay: false,
+          captionLanguage: 'vi',
+          loop: true,
         ),
       );
     }
@@ -36,6 +40,23 @@ class _YoutubeVideoAppState extends State<YoutubeVideoApp> {
   @override
   Widget build(BuildContext context) {
     final defaultStyles = DefaultStyles.getInstance(context);
+    if (!canShowPlayer) {
+      final ytbThumbnail = YoutubePlayer.getThumbnail(
+        videoId: videoId ?? '',
+        quality: ThumbnailQuality.high,
+      );
+      return GestureDetector(
+        onTap: () => setState(() => canShowPlayer = !canShowPlayer),
+        child: AspectRatio(
+          aspectRatio: 360 / 202.5,
+          child: Image.network(
+            ytbThumbnail,
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }
+
     if (_youtubeController == null) {
       if (widget.readOnly) {
         return RichText(
@@ -50,30 +71,28 @@ class _YoutubeVideoAppState extends State<YoutubeVideoApp> {
       return RichText(
           text: TextSpan(text: widget.videoUrl, style: defaultStyles.link));
     }
+    // _youtubeController?.toggleFullScreenMode();
 
-    return Container(
-      height: 300,
-      child: YoutubePlayerBuilder(
-        player: YoutubePlayer(
-          controller: _youtubeController,
-          showVideoProgressIndicator: true,
-        ),
-        builder: (context, player) {
-          return Column(
-            children: [
-              // some widgets
-              player,
-              //some other widgets
-            ],
-          );
-        },
+    return YoutubePlayerBuilder(
+      player: YoutubePlayer(
+        controller: _youtubeController!,
+        showVideoProgressIndicator: true,
       ),
+      builder: (context, player) {
+        return Column(
+          children: [
+            // some widgets
+            player,
+            //some other widgets
+          ],
+        );
+      },
     );
   }
 
   @override
   void dispose() {
+    _youtubeController?.dispose();
     super.dispose();
-    _youtubeController.dispose();
   }
 }

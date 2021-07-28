@@ -224,8 +224,7 @@ class __QuillViewerState extends ViewerState
           return YoutubeVideoApp(
               videoUrl: videoUrl, context: context, readOnly: readOnly);
         }
-        return VideoApp(
-            videoUrl: videoUrl, context: context, readOnly: readOnly);
+        return VideoApp(videoUrl: videoUrl, readOnly: readOnly);
       default:
         throw UnimplementedError(
           'Embeddable type "${node.value.type}" is not supported by default '
