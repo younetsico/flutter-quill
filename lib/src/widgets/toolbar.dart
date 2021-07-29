@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/src/widgets/toolbar/emoji_button.dart';
 
 import '../models/documents/attribute.dart';
 import 'controller.dart';
@@ -85,6 +84,7 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
     FilePickImpl? filePickImpl,
     WebImagePickImpl? webImagePickImpl,
     WebVideoPickImpl? webVideoPickImpl,
+    List<Widget>? customToolbarActions,
     Key? key,
   }) {
     final isButtonGroupShown = [
@@ -307,17 +307,18 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
             icon: Icons.horizontal_rule,
             iconSize: toolbarIconSize,
           ),
-        if (showEmoji)
-          EmojiButton(
-              icon: Icons.emoji_emotions_outlined,
-              controller: controller,
-              iconSize: toolbarIconSize,
-          ),
         if (showLink)
           LinkStyleButton(
             controller: controller,
             iconSize: toolbarIconSize,
           ),
+        // if (showEmoji)
+        //   EmojiButton(
+        //       icon: Icons.emoji_emotions_outlined,
+        //       controller: controller,
+        //       iconSize: toolbarIconSize,
+        //   ),
+        ...customToolbarActions ?? []
       ],
     );
   }

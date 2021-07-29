@@ -100,36 +100,36 @@ String _standardizeImageUrl(String url) {
 }
 
 class QuillEditor extends StatefulWidget {
-  QuillEditor(
-      {required this.controller,
-      required this.focusNode,
-      required this.scrollController,
-      required this.scrollable,
-      required this.padding,
-      required this.autoFocus,
-      required this.readOnly,
-      required this.expands,
-      this.showCursor,
-      this.paintCursorAboveText,
-      this.placeholder,
-      this.enableInteractiveSelection = true,
-      this.scrollBottomInset = 0,
-      this.minHeight,
-      this.maxHeight,
-      this.customStyles,
-      this.textCapitalization = TextCapitalization.sentences,
-      this.keyboardAppearance = Brightness.light,
-      this.scrollPhysics,
-      this.onLaunchUrl,
-      this.onTapDown,
-      this.onTapUp,
-      this.onSingleLongTapStart,
-      this.onSingleLongTapMoveUpdate,
-      this.onSingleLongTapEnd,
-      this.options = const {},
-      this.embedBuilder,
-      this.bottomWidget,
-      this.onCustomToolbarActionCallback});
+  QuillEditor({
+    required this.controller,
+    required this.focusNode,
+    required this.scrollController,
+    required this.scrollable,
+    required this.padding,
+    required this.autoFocus,
+    required this.readOnly,
+    required this.expands,
+    this.showCursor,
+    this.paintCursorAboveText,
+    this.placeholder,
+    this.enableInteractiveSelection = true,
+    this.scrollBottomInset = 0,
+    this.minHeight,
+    this.maxHeight,
+    this.customStyles,
+    this.textCapitalization = TextCapitalization.sentences,
+    this.keyboardAppearance = Brightness.light,
+    this.scrollPhysics,
+    this.onLaunchUrl,
+    this.onTapDown,
+    this.onTapUp,
+    this.onSingleLongTapStart,
+    this.onSingleLongTapMoveUpdate,
+    this.onSingleLongTapEnd,
+    this.options = const {},
+    this.embedBuilder,
+    this.bottomWidget,
+  });
 
   factory QuillEditor.basic({
     required QuillController controller,
@@ -192,7 +192,6 @@ class QuillEditor extends StatefulWidget {
 
   final EmbedBuilder? embedBuilder;
   final Widget? bottomWidget;
-  final ToolbarActionListener? onCustomToolbarActionCallback;
 
   Widget _defaultEmbedBuilder(
       BuildContext context, leaf.Embed node, bool readOnly) {
@@ -328,8 +327,7 @@ class _QuillEditorState extends State<QuillEditor>
           widget.scrollPhysics,
           widget.embedBuilder ?? widget._defaultEmbedBuilder,
           bottomWidget: widget.bottomWidget,
-          onCustomToolbarActionCallback: widget.onCustomToolbarActionCallback,
-        ));
+      ));
   }
 
   @override

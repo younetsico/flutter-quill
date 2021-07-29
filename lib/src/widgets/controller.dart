@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -46,8 +45,6 @@ class QuillController extends ChangeNotifier {
   /// removing or listeners to this instance.
   bool _isDisposed = false;
 
-  ValueNotifier<bool> isEmojiKeyboardActive = ValueNotifier(false);
-
   // item1: Document state before [change].
   //
   // item2: Change delta applied to the document.
@@ -55,9 +52,6 @@ class QuillController extends ChangeNotifier {
   // item3: The source of this change.
   Stream<Tuple3<Delta, Delta, ChangeSource>> get changes => document.changes;
 
-  final _customEventController = StreamController<CustomToolbarAction>
-      .broadcast();
-  final _listeners = LinkedList<_ToolbarActionListenerEntry>();
 
   TextEditingValue get plainTextEditingValue => TextEditingValue(
         text: document.toPlainText(),
@@ -193,9 +187,15 @@ class QuillController extends ChangeNotifier {
     formatText(selection.start, selection.end - selection.start, attribute);
   }
 
-  void updateSelection(TextSelection textSelection, ChangeSource source) {
+  void updateSelection(TextSelection textSelection, ChangeSource source
+      , {bool ignoreFocus = false}) {
     _updateSelection(textSelection, source);
+
+    if (ignoreFocus) {
+      ignoreFocusOnTextChange = true;
+    }
     notifyListeners();
+    ignoreFocusOnTextChange = false;
   }
 
   void compose(Delta delta, TextSelection textSelection, ChangeSource source) {
@@ -236,12 +236,6 @@ class QuillController extends ChangeNotifier {
   void dispose() {
     if (!_isDisposed) {
       document.close();
-
-      for (final listener in _listeners.toList()) {
-        listener.streamSubscription.cancel();
-        listener.unlink();
-      }
-      print('[QuillEditor] Controller disposing');
     }
 
     _isDisposed = true;
@@ -255,40 +249,5 @@ class QuillController extends ChangeNotifier {
         baseOffset: math.min(selection.baseOffset, end),
         extentOffset: math.min(selection.extentOffset, end));
   }
-
-  void sendToolbarAction(CustomToolbarAction action) {
-    _customEventController.add(action);
-
-    isEmojiKeyboardActive.value = !isEmojiKeyboardActive.value;
-    isEmojiKeyboardActive.notifyListeners();
-  }
-
-  void registerToolbarAction(ToolbarActionListener listener) {
-    if (!_isDisposed) {
-
-      final streamSub = _customEventController.stream.listen((event) {
-        listener.call(event);
-      });
-      _listeners.add(_ToolbarActionListenerEntry(listener, streamSub));
-    }
-  }
-
-  void unregisterToolbarAction(ToolbarActionListener listener) {
-    if (!_isDisposed) {
-      for (final entry in _listeners) {
-        if (entry.listener == listener) {
-          entry.unlink();
-          entry.streamSubscription.cancel();
-          return;
-        }
-      }
-    }
-  }
 }
 
-class _ToolbarActionListenerEntry
-    extends LinkedListEntry<_ToolbarActionListenerEntry> {
-  _ToolbarActionListenerEntry(this.listener, this.streamSubscription);
-  final ToolbarActionListener listener;
-  final StreamSubscription streamSubscription;
-}
