@@ -44,6 +44,7 @@ class QuillSimpleViewer extends StatefulWidget {
     this.embedBuilder,
     this.onCheckBoxTap,
     Key? key,
+    this.onTapViewer,
   })  : assert(truncate ||
             ((truncateScale == null) &&
                 (truncateAlignment == null) &&
@@ -64,6 +65,7 @@ class QuillSimpleViewer extends StatefulWidget {
   final Map<String, String>? options;
   final bool readOnly;
   final Function(int offset, bool value)? onCheckBoxTap;
+  final Function()? onTapViewer;
 
   @override
   QuillSimpleViewerState createState() => QuillSimpleViewerState();
@@ -88,6 +90,7 @@ class QuillSimpleViewerState extends State<QuillSimpleViewer>
         HitTestBehavior.deferToChild,
         QuillViewer(
           controller: widget.controller,
+          onTapViewer: widget.onTapViewer,
           readOnly: widget.readOnly,
           customStyles: widget.customStyles,
           embedBuilder: widget.embedBuilder,
@@ -136,6 +139,7 @@ class QuillViewer extends StatefulWidget {
     this.options = const {},
     this.embedBuilder,
     this.onCheckBoxTap,
+    this.onTapViewer,
     Key? key,
     this.onLaunchUrl,
   })  : assert(truncate ||
@@ -158,6 +162,7 @@ class QuillViewer extends StatefulWidget {
   final bool readOnly;
   final Function(String)? onLaunchUrl;
   final Function(int offset, bool value)? onCheckBoxTap;
+  final Function()? onTapViewer;
 
   @override
   __QuillViewerState createState() => __QuillViewerState();
@@ -419,11 +424,7 @@ class __QuillViewerState extends ViewerState
 
   void _nullSelectionChanged(
       TextSelection selection, SelectionChangedCause cause) {
-    final a = widget.controller.document
-        .queryChild(selection.baseOffset)
-        .node
-        ?.toDelta();
-    print('${a?.toJson()}');
+    widget.onTapViewer?.call();
   }
 
   @override
