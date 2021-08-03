@@ -194,8 +194,12 @@ class QuillController extends ChangeNotifier {
     if (ignoreFocus) {
       ignoreFocusOnTextChange = true;
     }
+
     notifyListeners();
-    ignoreFocusOnTextChange = false;
+
+    if (ignoreFocus) {
+      ignoreFocusOnTextChange = false;
+    }
   }
 
   void compose(Delta delta, TextSelection textSelection, ChangeSource source) {

@@ -470,14 +470,7 @@ class RawEditorState extends EditorState
       // Edited on 13:51 on Wed 28 Jul 2021
       // i commented this line to prevent emoji keyboard keeping unfocus
       // after choosed one
-      // _onChangeTextEditingValue(ignoreFocus);
-
-      if (mounted) {
-        setState(() {
-          // Use widget.controller.value in build()
-          // Trigger build and updateChildren
-        });
-      }
+      _onChangeTextEditingValue(ignoreFocus);
     } else {
       requestKeyboard();
       if (mounted) {
@@ -492,6 +485,12 @@ class RawEditorState extends EditorState
   void _onChangeTextEditingValue([bool ignoreCaret = false]) {
     updateRemoteValueIfNeeded();
     if (ignoreCaret) {
+      if (mounted) {
+        setState(() {
+          // Use widget.controller.value in build()
+          // Trigger build and updateChildren
+        });
+      }
       return;
     }
     _showCaretOnScreen();
